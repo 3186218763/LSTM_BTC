@@ -71,6 +71,21 @@ class LSTMModel(nn.Module):
         return predictions
 
 
+class GRUModel(nn.Module):
+    def __init__(self, input_size=1, hidden_layer_size=100, output_size=prediction_length):
+        super(GRUModel, self).__init__()
+        self.hidden_layer_size = hidden_layer_size
+        self.gru = nn.GRU(input_size, hidden_layer_size, batch_first=True)
+        self.hidden_cell = torch.zeros(1, 1, self.hidden_layer_size).to(device)
+        self.linear = nn.Linear(hidden_layer_size, output_size)
+
+    def forward(self, input_seq):
+        gru_out, self.hidden_cell = self.gru(input_seq, self.hidden_cell)
+        gru_out_last = gru_out[:, -1, :]
+        predictions = self.linear(gru_out_last)
+        return predictions
+
+
 # 实例化模型，定义损失函数和优化器
 model = LSTMModel().to(device)
 loss_function = nn.MSELoss().to(device)
